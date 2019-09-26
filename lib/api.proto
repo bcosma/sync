@@ -13,6 +13,12 @@ message Credentials {
     string policy = 2;
     string signature = 3;
     string acl = 4;
+    string xAmzAlgorithm = 5;
+    string xAmzServerSideEncryption = 6;
+    string xAmzCredential = 7;
+    string xAmzDate = 8;
+    string xAmzSignature = 9;
+    string xAmzSecurityToken = 10;
   }
   Aws aws = 1;
   S3Post s3Post = 2;

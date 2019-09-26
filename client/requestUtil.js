@@ -232,13 +232,14 @@ const CATEGORIES_FOR_SQS = [proto.categories.BOOKMARKS, proto.categories.PREFERE
  * @returns {boolean}
 */
 RequestUtil.prototype.shouldListObject = function (startAt, category) {
-  let currentTime = new Date().getTime()
-  let startAtToCheck = this.normalizeTimestampToMs(startAt, currentTime)
-
-  return !startAtToCheck ||
-      (currentTime - startAtToCheck) > parseInt(s3Helper.SQS_RETENTION, 10) * 1000 ||
-      !CATEGORIES_FOR_SQS.includes(category) ||
-      this.listInProgress === true
+  return true;
+  // let currentTime = new Date().getTime()
+  // let startAtToCheck = this.normalizeTimestampToMs(startAt, currentTime)
+  //
+  // return !startAtToCheck ||
+  //     (currentTime - startAtToCheck) > parseInt(s3Helper.SQS_RETENTION, 10) * 1000 ||
+  //     !CATEGORIES_FOR_SQS.includes(category) ||
+  //     this.listInProgress === true
 }
 
 /**
@@ -422,13 +423,32 @@ RequestUtil.prototype.put = function (category, record) {
 
 RequestUtil.prototype.s3PostFormData = function (objectKey) {
   let formData = new FormData() // eslint-disable-line
-  formData.append('key', objectKey)
+  formData.append('key', objectKey);
+  let form_item_key = "";
   for (let key of Object.keys(this.postData)) {
-    formData.append(key, this.postData[key])
+    switch(key) {
+      case "xAmzAlgorithm":
+        form_item_key = "x-amz-algorithm";break;
+      case "xAmzServerSideEncryption":
+        form_item_key = "x-amz-server-side-encryption";break;
+      case "xAmzCredential":
+        form_item_key = "x-amz-credential";break;
+      case "xAmzDate":
+        form_item_key = "x-amz-date";break;
+      case "xAmzSignature":
+        form_item_key = "x-amz-signature";break;
+      case "xAmzSecurityToken":
+        form_item_key = "x-amz-security-token";
+        break;
+      default:
+        form_item_key = key;
+    }
+
+    formData.append(form_item_key, this.postData[key])
   }
-  formData.append('file', new Uint8Array([]))
+  formData.append('file', new Uint8Array([]));
   return formData
-}
+};
 
 /**
  * In S3 you can't delete all keys matching a prefix, so you need to list by
